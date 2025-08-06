@@ -16,7 +16,7 @@ public class frequentItemSetMiner {
         ConcurrentHashMap<Set<Integer>, Set<Integer>> FreqItemSets = new ConcurrentHashMap<>();
 
         // Create String variable to represent file name
-        String inputfile = "DanielText.txt";
+        String inputfile = "E:\\Java Programming Files\\DataScienceWithJava\\DanielText.txt";
 
         //File object to point to the text file
         FileReader read = new FileReader(inputfile);
@@ -36,7 +36,7 @@ public class frequentItemSetMiner {
                 transactionId++;
 
                 //split line into unique items
-                String[] transactionSplit = line.split("");
+                String[] transactionSplit = line.trim().split("\\s+");
 
                 //loop through transactionSplit Array to get each unique item
                 for(String uniqueItem: transactionSplit) {
@@ -50,7 +50,7 @@ public class frequentItemSetMiner {
                     Set<Integer> itemID = new HashSet<>();
 
                     //add transaction ID to the itemId
-                    itemID.add(transactionId);
+//                    itemID.add(transactionId);
                     Set<Integer> TIDS = FreqItemSets.get(itemset);
 
                     //Check if  itemset exists or not in the map
@@ -61,7 +61,7 @@ public class frequentItemSetMiner {
                         itemID.add(transactionId);
 
                         //Store uniqueItem in a set of integers
-                        itemset.add(item);
+//                        itemset.add(item);
                         FreqItemSets.put(itemset, itemID);
                     }else{
                         //key (itemset) exists in map
@@ -69,7 +69,8 @@ public class frequentItemSetMiner {
                         //Update the map with new TIDS
                         Set<Integer> newtransactionID = new HashSet<>();
                         newtransactionID.add(transactionId);
-                        itemset.add(item);
+//                        itemset.add(item);
+
                         TIDS.addAll(newtransactionID);
                         FreqItemSets.put(itemset, TIDS);
 
@@ -78,7 +79,47 @@ public class frequentItemSetMiner {
 
 
                 }
+//                System.out.println(FreqItemSets);
             }
+            //close reader
+            reader.close();
+
+            System.out.println("Before Pruning");
+            System.out.println(FreqItemSets);
+            //Remove infrequent length-1 itemset from FrequentItemsets Map
+
+            System.out.println("After Pruning");
+            //Create a list (set of integers) to enable candidate
+            //Generation using Apriori (Store frequent length-1 first)
+            List <Set<Integer>> loopingList = new ArrayList<>();
+
+            //For each entry in freqItemSet Map
+            //Remove those entries that are not frequent
+            for (Map.Entry<Set<Integer>, Set<Integer>> entry:FreqItemSets.entrySet()){
+                if(entry.getValue().size()>=minsup){
+                    //Itemset is frequent
+                    loopingList.add(entry.getKey());
+                }else{
+                    //Itemset is infrquent, Remove from frequentItemSet Map
+                    FreqItemSets.remove(entry.getKey());
+                }
+            }
+            System.out.println(FreqItemSets);
+            System.out.println("Before sorting");
+            System.out.println(loopingList);
+
+            //Sort loopingList in order to enable Apriori Candidate Generation
+            Collections.sort(loopingList, new Comparator<Set<Integer>>() {
+                @Override
+                public int compare(Set<Integer> set1, Set<Integer> set2) {
+                    Integer val1 = set1.iterator().next();
+                    Integer val2 = set2.iterator().next();
+                    return Integer.compare(val1, val2);
+                }
+            });
+            System.out.println("After sorting");
+            System.out.println(loopingList);
+
         }
     }
 }
