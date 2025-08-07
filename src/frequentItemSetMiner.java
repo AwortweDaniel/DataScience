@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class frequentItemSetMiner {
     public static void main(String[] args) throws FileNotFoundException, IOException, NumberFormatException {
         //Criteria of interestingness
-        int minsup = 4;
+        int minsup = 2;
 
         //Create a hashmap to store the unique items and their transaction ids
 
@@ -37,6 +37,7 @@ public class frequentItemSetMiner {
 
                 //split line into unique items
                 String[] transactionSplit = line.trim().split("\\s+");
+                System.out.println(Arrays.toString(transactionSplit));
 
                 //loop through transactionSplit Array to get each unique item
                 for(String uniqueItem: transactionSplit) {
@@ -50,7 +51,7 @@ public class frequentItemSetMiner {
                     Set<Integer> itemID = new HashSet<>();
 
                     //add transaction ID to the itemId
-//                    itemID.add(transactionId);
+                    itemset.add(item);
                     Set<Integer> TIDS = FreqItemSets.get(itemset);
 
                     //Check if  itemset exists or not in the map
@@ -119,6 +120,73 @@ public class frequentItemSetMiner {
             });
             System.out.println("After sorting");
             System.out.println(loopingList);
+
+            //Loop through the loopinglist to genrate the remaining frequent itemset
+            while(loopingList.size() > 1){
+                //Create a list for swapping to store
+                //Generate candidate/frequent itemsets temp.
+                List<Set<Integer>> test = new ArrayList<>();
+
+                //Outer for loop
+                for(int i = 0; i< loopingList.size();i++){
+                    //Create an arrayList to store the itemset
+                    //From the looping list to be used in generating
+                    //The frequent itemset, sort to enable obtain
+                    //Prefix and suffix for apriori candidate generation
+                    List<Integer>firstHalf = new ArrayList<>();
+
+                    //Add item at index i to firstHalf
+                    firstHalf.addAll(loopingList.get(i));
+
+                    //Sort to enable extract suffix
+                    Collections.sort(firstHalf);
+
+                    //Create sets to store prefix and suffix
+                    Set<Integer> prefixFH = new HashSet<>();
+                    Set<Integer> suffixFH = new HashSet<>();
+
+                    //Extract suffix from sorted first half
+                    suffixFH.add(firstHalf.get(firstHalf.size() -1));
+
+                    //Get prefix from firstHalf
+                    prefixFH.addAll(firstHalf);
+
+                    //Remove suffix from prefix
+                    prefixFH.removeAll(suffixFH);
+
+                    //Inner for loop
+                    for(int j = i+1; j<loopingList.size();j++){
+                        //Create an arrayList to store the itemset
+                        //From the looping list to be used in generating
+                        //The frequent itemset, sort to enable obtain
+                        //Prefix and suffix for apriori candidate generation
+                        List<Integer>secondHalf = new ArrayList<>();
+
+                        //Add item at index i to firstHalf
+                        secondHalf.addAll(loopingList.get(j));
+
+                        //Sort to enable extract suffix
+                        Collections.sort(secondHalf);
+
+                        //Create sets to store prefix and suffix
+                        Set<Integer> prefixSH = new HashSet<>();
+                        Set<Integer> suffixSH = new HashSet<>();
+
+                        //Extract suffix from sorted first half
+                        suffixSH.add(secondHalf.get(secondHalf.size() -1));
+
+                        //Get prefix from firstHalf
+                        prefixSH.addAll(secondHalf);
+
+                        //Remove suffix from prefix
+                        prefixSH.removeAll(suffixSH);
+
+                        System.out.println(prefixFH + " "+prefixSH);
+                        System.out.println(suffixFH + " "+suffixSH);
+
+                    }
+                }break;
+            }
 
         }
     }
