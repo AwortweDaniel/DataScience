@@ -8,6 +8,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class frequentItemSetMiner {
     public static void main(String[] args) throws FileNotFoundException, IOException, NumberFormatException {
+
+        final long startTime = System.currentTimeMillis();
+        final Runtime runtime = Runtime.getRuntime();
+
         //Criteria of interestingness
         int minsup = 2;
 
@@ -101,7 +105,7 @@ public class frequentItemSetMiner {
                     //Itemset is frequent
                     loopingList.add(entry.getKey());
                 }else{
-                    //Itemset is infrquent, Remove from frequentItemSet Map
+                    //Itemset is infrequent, Remove from frequentItemSet Map
                     FreqItemSets.remove(entry.getKey());
                 }
             }
@@ -125,7 +129,7 @@ public class frequentItemSetMiner {
             while(loopingList.size() > 1){
                 //Create a list for swapping to store
                 //Generate candidate/frequent itemsets temp.
-                List<Set<Integer>> test = new ArrayList<>();
+                List<Set<Integer>> swapList = new ArrayList<>();
 
                 //Outer for loop
                 for(int i = 0; i< loopingList.size();i++){
@@ -184,10 +188,70 @@ public class frequentItemSetMiner {
                         System.out.println(prefixFH + " "+prefixSH);
                         System.out.println(suffixFH + " "+suffixSH);
 
-                    }
-                }break;
-            }
+                        //Create data structures to store TIDS of firstHalf and secondHalf
+                        Set<Integer> FHTIDS = new HashSet<>();
+                        Set<Integer> SHTIDS = new HashSet<>();
 
+                        //Get TIDS from FreqItemSets and add to FHTIDS and SHTIDS
+                        FHTIDS.addAll(FreqItemSets.get(loopingList.get(i)));
+                        SHTIDS.addAll(FreqItemSets.get(loopingList.get(j)));
+
+                        //Create a set to store the intersection TIDS
+                        Set<Integer> IntersectionTID = new HashSet<>();
+                        IntersectionTID.addAll(FHTIDS);
+                        IntersectionTID.retainAll(SHTIDS);
+
+                        //Check if the itemSet is frequent using intersectionTID
+                        if(IntersectionTID.size()>= minsup){
+                            //Potentially frequent itemSet
+                            //Check if the itemSet meets the apriori property
+                            if (prefixFH.equals(prefixSH) && !(suffixFH.equals(suffixSH))){
+                                //Generate frequent itemset
+                                Set<Integer> FItemSet = new HashSet<>();
+                                FItemSet.addAll(prefixFH);
+                                FItemSet.addAll(suffixFH);
+                                FItemSet.addAll(suffixSH);
+
+                                //Add generated frequent itemset (FItemSet)
+                                // And the TIDS( IntersectionTID) to freqItemSets
+                                FreqItemSets.put(FItemSet, IntersectionTID);
+
+                                //Add only the generated frequent itemSet (FItemSet)
+                                //To swapping list for next round of candidate generation
+                                swapList.add(FItemSet);
+                            }else{
+                                //Apriori candidate generation not met
+                                //Break from inner loop
+                                break;
+                            }
+                        }
+
+
+                    }
+                }
+                //Clear content of loopingList
+                //Add all content in the swappinglist to loopingList
+                loopingList.clear();
+                loopingList.addAll(swapList);
+
+            }
+            long endTime = System.currentTimeMillis();
+            long memory = runtime.totalMemory() - runtime.freeMemory();
+            System.out.println("\t Memory and Runtime");
+            System.out.println("=============================================");
+
+            //System.out.println("Memory used: "+ memory/(1024*1024)+ "Mb");
+            System.out.println("Memory used: "+ memory/(1024*1024)+ "Mb");
+            System.out.println("Runtime: "+ (endTime-startTime));
+            System.out.println("Dataset size: "+ transactionId);
+            System.out.println("Minimum support: "+minsup);
+            System.out.println("Frequent itemsets: "+ FreqItemSets.size());
+            System.out.println("===============================================");
+//            for(Map.Entry<Set<Integer>, Set<Integer>> entry: FreqItemSets.entrySet() ){
+//                System.out.println("Frequent Itemset: "+ entry.getKey()+"support count"+);
+//                System.out.println("Frequent Itemset: "+ entry.getKey()+"support"+);
+//                System.out.println("Frequent Itemset: "+ entry.getKey()+"support count "+);
+//            }
         }
     }
 }
