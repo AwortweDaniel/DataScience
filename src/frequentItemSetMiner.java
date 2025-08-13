@@ -248,9 +248,9 @@ public class frequentItemSetMiner {
             System.out.println("Frequent itemsets: "+ FreqItemSets.size());
             System.out.println("===============================================");
             for(Map.Entry<Set<Integer>, Set<Integer>> entry: FreqItemSets.entrySet() ){
-//                System.out.println("Frequent Itemset: "+ entry.getKey()+"support count"+);
-//                System.out.println("Frequent Itemset: "+ entry.getKey()+"support"+);
-                System.out.println("Frequent Itemset: "+ entry.getKey()+"support count "+ entry.getValue());
+                System.out.println("Frequent Itemset: "+ entry.getKey()+" support count: "+ entry.getValue().size());
+                System.out.println("Frequent Itemset: "+ entry.getKey()+" support: "+ Math.round(entry.getValue().size()/(double)transactionId)*1000.00/1000.00);
+                System.out.println("Frequent Itemset: "+ entry.getKey()+" support count "+ entry.getValue());
             }
         }
     }
